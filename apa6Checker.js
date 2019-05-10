@@ -11,14 +11,31 @@ if(filename === "--help" || filename==="-h") {
     console.info("Usage node apa6Checker.js opari.docx");
 }
 
+var err1=[];
+var err2=[];
+var err3=[];
+
 docxParser.parseDocx(filename, function(data){
      //Etsi kaikki viittaukset teksistä
     data = data.replace("\\n","\n");
 
-    _.each(data.match(/((\([A-Z]))(.*?)(,.*?)(?:(\.\)|\)\.|\)))(.|)/g), function(r) {
-        refs[r]=0;
+    _.each(data.match(/\(.*?\)(\.|)/g)/*Esiparsinta*/, function(r) { //Kaikki teksti sulkujen sisältä + piste perästä, jos sattuu olemaan
+        if(r.match(/([0-9]{4,}|(n\.d\.)|(s\. a\.))/) /*sisältää vuosiluvun tai .n.d tai s. a.*/) {
+            if(r.match(/[a-zA-Z]{2,}/)) //Sisältää vähintään kaksi kirjainta
+            {
+                if(r.match(/(\)\.|\.\))/)) { //Sisältää ). tai .) lopun
+                    refs[r]=0;
+                } else {
+                    //Virheellinen viittaus
+                    if(!r.match(/Luettu /)) {
+                        err3.push(r);
+                    }
+                }
+            }
+        }
     });
 
+    
     //Etsi lähdeluettelo ja lähteet
     _.each(data.match(/^(.*)\((\d{4})\).*$/gm), function(r) {
         bibliography[r]=0;
@@ -54,9 +71,6 @@ docxParser.parseDocx(filename, function(data){
 
     });
 
-    var err1=[];
-    var err2=[];
-    var err3=[];
 
     _.each(bibliography, function(v,k) {
        if(v<=0) {
@@ -67,12 +81,6 @@ docxParser.parseDocx(filename, function(data){
     _.each(refs, function(v,k) {
        if(v<=0) {
          err2.push(k);
-       }
-    }); 
-
-    _.each(refs, function(v,k) {
-       if(!k.match(/(\.\)|\)\.)/)) {
-         err3.push(k);
        }
     }); 
 
