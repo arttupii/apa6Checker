@@ -13,6 +13,8 @@ if(filename === "--help" || filename==="-h") {
 
 docxParser.parseDocx(filename, function(data){
      //Etsi kaikki viittaukset teksistä
+    data = data.replace("\\n","\n");
+
     _.each(data.match(/((\([A-Z]))(.*?)(,.*?)(?:(\.\)|\)\.|\)))(.|)/g), function(r) {
         refs[r]=0;
     });
@@ -82,11 +84,11 @@ docxParser.parseDocx(filename, function(data){
     }
 
     if(err2.length) {
-        console.info("Ei lähdeviittausta seuraaviin referensseihin:", JSON.stringify(err2,0,3));
+        console.info("Ei lähdettä seuraaville viittauksille:", JSON.stringify(err2,0,3));
     }
 
     if(err3.length) {
-        console.info("Tarkista seuraavien viitteiden oikeellisuus:", JSON.stringify(err3,0,3));
+        console.info("Tarkista seuraavien viitteiden oikeellisuus ja kirjoitusasu:", JSON.stringify(err3,0,3));
     }
 
 });
